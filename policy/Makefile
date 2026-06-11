@@ -34,7 +34,7 @@ all: $(TARGETs)
 $(BUILD_DIR):
 	@mkdir -p $@
 
-SO_NAMES = bpf-linker pin-registry map-resolver btf-preprocessor
+SO_NAMES = bpf-linker pin-registry btf-preprocessor
 SO_OBJS = $(addprefix $(BUILD_DIR)/,$(addsuffix .o,$(SO_NAMES)))
 
 $(BUILD_DIR)/%: $(BUILD_DIR)/%.o $(BUILD_DIR)/log.o $(SO_OBJS) | $(BUILD_DIR)
