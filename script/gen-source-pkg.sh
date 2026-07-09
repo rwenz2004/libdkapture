@@ -226,19 +226,11 @@ if [ -f bpf/build/include/vmlinux.h ]; then
     VMLINUX_OVERRIDE="VMLINUX=bpf/build/include/vmlinux.h"
 fi
 
-# Build extern-prep once to avoid parallel build race across modules
-make -C tools extern-prep
-
 make %{?_smp_mflags} USE_SUBMODULE=0                     \\
     \${VMLINUX_OVERRIDE}                                   \\
-    BPF_PREPROCESS=\$(pwd)/build/tools/extern-prep         \\
     KHEADERS_DIR="\${KHEADERS_DIR}"                       \\
-    bpf                                                  \\
-    observe BPF_DIR_PATCH=/usr/lib/dkapture               \\
-    filter BPF_DIR_PATCH=/usr/lib/dkapture                \\
-    policy BPF_DIR_PATCH=/usr/lib/dkapture                \\
-    so                                                    \\
-    demo
+    BPF_DIR_PATCH=/usr/lib/dkapture                      \\
+    all
 
 %install
 # Directories

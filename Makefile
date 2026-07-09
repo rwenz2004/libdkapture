@@ -21,10 +21,9 @@ USE_SUBMODULE ?= 1
 
 all: $(TARGETs)
 
-demo test: so
 bpf: $(if $(filter 1,$(USE_SUBMODULE)),bpf.gitsubmodule)
-observe filter policy: bpf tools
-so: observe filter policy
+demo observe filter policy test: so
+so: bpf
 
 $(TARGETs):
 	$(MAKE) -C $@

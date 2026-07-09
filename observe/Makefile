@@ -24,8 +24,13 @@ ifeq ($(BPF_TARGET_ARCH), loongarch)
 	TARGETs := $(call filter-out-multi, $(TARGETs), $(BLACKLIST))
 endif
 
-LDFLAGS = -Wl,--no-as-needed -lbpf -lpthread -lelf -lz
-CFLAGS := -Wall -I$(PROJ_ROOT)/include -I$(PROJ_ROOT)/so -I$(BUILD_DIR) -I$(PROJ_ROOT)/bpf/export
+LDFLAGS = -Wl,--no-as-needed,-z,relro,-z,now -lbpf -lpthread -lelf -lz
+CFLAGS := -Wall -I$(PROJ_ROOT)/include \
+			-I$(PROJ_ROOT)/so \
+			-I$(PROJ_ROOT)/build/include \
+			-I$(BUILD_DIR) \
+			-I$(PROJ_ROOT)/bpf/export \
+			-fstack-protector-all
 
 ifneq ($(SHARED_LIB), )
 	CFLAGS += -fPIC 
@@ -56,7 +61,7 @@ all: $(TARGETs)
 $(BUILD_DIR):
 	@mkdir -p $@
 
-SO_NAMES = bpf-linker pin-registry btf-preprocessor
+SO_NAMES = bpf-linker pin-registry
 SO_OBJS = $(addprefix $(BUILD_DIR)/,$(addsuffix .o,$(SO_NAMES)))
 
 $(BUILD_DIR)/%: $(BUILD_DIR)/%.o $(BUILD_DIR)/log.o $(SO_OBJS)
@@ -71,12 +76,11 @@ $(BUILD_DIR)/%.o: %.c $(BUILD_DIR)/%.skel.h | $(BUILD_DIR)
 $(BUILD_DIR)/%.o: $(PROJ_ROOT)/so/%.cpp | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-BPF_PREPROCESS = $(PROJ_ROOT)/build/tools/extern-prep
+BPF_DIR_PATCH ?= $(BPF_DIR)
 
-$(BUILD_DIR)/%.skel.h: $(BPF_DIR)/%.bpf.o $(BPF_PREPROCESS) | $(BUILD_DIR)
-	$(BPF_PREPROCESS) $< $(BUILD_DIR)/$*.bpf.o
-	bpftool gen skeleton $(BUILD_DIR)/$*.bpf.o > $@
-	python3 $(PROJ_ROOT)/script/patch_skel.py --obj-dir $(BUILD_DIR) $@
+$(BUILD_DIR)/%.skel.h: $(BPF_DIR)/%.bpf.o | $(BUILD_DIR)
+	bpftool gen skeleton $< > $@
+	python3 $(PROJ_ROOT)/script/patch_skel.py --obj-dir $(BPF_DIR_PATCH) $@
 
 clean:
 	rm -f $(BUILD_DIR)/*.o $(BUILD_DIR)/*.d $(TARGETs) $(BUILD_DIR)/.tmp.*.skel.h

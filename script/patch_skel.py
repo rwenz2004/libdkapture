@@ -397,6 +397,9 @@ def patch_header(header_path: str, dry_run: bool = False, obj_dir: str | None = 
         sys.stdout.write(new_src)
         return
 
+    if new_src == src:
+        return
+
     with open(header_path, 'w', encoding='utf-8') as f:
         f.write(new_src)
 
@@ -424,5 +427,3 @@ if __name__ == '__main__':
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
-
-

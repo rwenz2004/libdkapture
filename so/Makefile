@@ -14,7 +14,8 @@ CXX_OBJ = $(CXX_SRC:%.cpp=$(BUILD_DIR)/%.o) \
 		  $(BUILD_DIR)/mountsnoop.o \
 		  $(BUILD_DIR)/irqsnoop.o
 
-CXXFLAGS = -fPIC -Wall \
+LDFLAGS = -Wl,--no-as-needed,-z,relro,-z,now -lbpf -shared 
+CXXFLAGS = -fPIC -Wall -fstack-protector-all\
 		   -I$(PROJ_ROOT)/include \
 		   -I$(PROJ_ROOT)/build/observe \
 		   -I$(PROJ_ROOT)/bpf/export
@@ -26,9 +27,7 @@ else
 	LD_FLAGS += -Wl,-rpath=$(PROJ_ROOT)/build/so/
 endif
 
-LDFLAGS = -Wl,--no-as-needed -lbpf -shared
-
-.PHONY: all so clean
+.PHONY: all so clean distclean
 .SECONDARY:
 .SUFFIXES:
 
@@ -52,7 +51,7 @@ $(BUILD_DIR):
 clean:
 	rm -f $(CXX_OBJ) $(BUILD_DIR)/*.d $(TARGET)
 
-distclean: clean
+distclean:
 	rm -rf $(BUILD_DIR)
 
 -include $(wildcard $(BUILD_DIR)/*.d)

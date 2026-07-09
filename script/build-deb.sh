@@ -126,23 +126,8 @@ echo -e "${YELLOW}Compiling project...${NC}"
 echo -e "${BLUE}Cleaning previous compilation...${NC}"
 ${MAKE} clean || echo -e "${YELLOW}Warning: Clean failed (may be first compilation)${NC}"
 
-echo -e "${BLUE}Compiling include module...${NC}"
-${MAKE} include || { echo -e "${RED}Error: include module compilation failed${NC}"; exit 1; }
-
-echo -e "${BLUE}Compiling observe module...${NC}"
-${MAKE} observe BPF_DIR_PATCH="${DKAPTURE_LIB_DIR#$DEB_DIR}" || { echo -e "${RED}Error: observe module compilation failed${NC}"; exit 1; }
-
-echo -e "${BLUE}Compiling filter module...${NC}"
-${MAKE} filter BPF_DIR_PATCH="${DKAPTURE_LIB_DIR#$DEB_DIR}" || { echo -e "${RED}Error: filter module compilation failed${NC}"; exit 1; }
-
-echo -e "${BLUE}Compiling policy module...${NC}"
-${MAKE} policy BPF_DIR_PATCH="${DKAPTURE_LIB_DIR#$DEB_DIR}" || { echo -e "${RED}Error: policy module compilation failed${NC}"; exit 1; }
-
-echo -e "${BLUE}Compiling so module...${NC}"
-${MAKE} so || { echo -e "${RED}Error: so module compilation failed${NC}"; exit 1; }
-
-echo -e "${BLUE}Compiling demo module...${NC}"
-${MAKE} demo || { echo -e "${RED}Error: demo module compilation failed${NC}"; exit 1; }
+echo -e "${BLUE}Compiling required modules...${NC}"
+${MAKE} observe filter policy demo BPF_DIR_PATCH="${DKAPTURE_LIB_DIR#$DEB_DIR}" || { echo -e "${RED}Error: project compilation failed${NC}"; exit 1; }
 
 # Collect binary files to /usr/bin
 echo -e "${YELLOW}Collecting binary files to /usr/bin...${NC}"
